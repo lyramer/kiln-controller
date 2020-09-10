@@ -26,7 +26,7 @@ currency_type   = "$"   # Currency Symbol to show when calculating cost to run j
 #   can use whichever GPIO you prefer/have available.
 
 ### Outputs
-gpio_heat = 23  # Switches zero-cross solid-state-relay
+gpio_heat = 16  # Switches zero-cross solid-state-relay
 heater_invert = 0 # switches the polarity of the heater control
 
 ### Thermocouple Adapter selection:

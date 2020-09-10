@@ -15,17 +15,17 @@ try:
         exit()
     if config.max31855:
         from max31855 import MAX31855, MAX31855Error
-        log.info("import MAX31855")
+        log.info("using MAX31855")
     if config.max31855spi:
         import Adafruit_GPIO.SPI as SPI
         from max31855spi import MAX31855SPI, MAX31855SPIError
-        log.info("import MAX31855SPI")
+        log.info("using MAX31855SPI")
         spi_reserved_gpio = [7, 8, 9, 10, 11]
         if config.gpio_heat in spi_reserved_gpio:
             raise Exception("gpio_heat pin %s collides with SPI pins %s" % (config.gpio_heat, spi_reserved_gpio))
     if config.max6675:
         from max6675 import MAX6675, MAX6675Error
-        log.info("import MAX6675")
+        log.info("using MAX6675")
     sensor_available = True
 except ImportError:
     log.exception("Could not initialize temperature sensor, using dummy values!")
@@ -108,9 +108,12 @@ class Oven (threading.Thread):
                     else:
                         self.runtime = runtime_delta.total_seconds()
 
+                # update the target temp value based on where we are in the firing schedule
                 self.target = self.profile.get_target_temperature(self.runtime)
+
                 pid = self.pid.compute(self.target, self.temp_sensor.temperature + config.thermocouple_offset)
 
+                # set heat_on to 0.0
                 heat_on = float(0)
                 heat_off = float(self.time_step)
                 if pid > 0:
@@ -177,7 +180,7 @@ class Oven (threading.Thread):
                else:
                  GPIO.output(config.gpio_heat, GPIO.LOW)
 
-
+    # sends state info to front end
     def get_state(self):
         state = {
             'runtime': self.runtime,
