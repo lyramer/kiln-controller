@@ -68,7 +68,7 @@ class Oven (threading.Thread):
                                                   self.time_step,
                                                   self.time_step)
         self.temp_sensor.start()
-        self.start()
+        #self.start()
 
     def reset(self):
         self.profile = None
