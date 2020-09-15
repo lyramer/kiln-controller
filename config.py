@@ -51,7 +51,7 @@ spi_sensor_chip_id = 0
 ### is made about switching the relay[s] on & off and for how long.
 ### The thermocouple is read five times during this period and the highest
 ### value is used.
-sensor_time_wait = 2
+sensor_time_wait = 5
 
 
 ########################################################################
