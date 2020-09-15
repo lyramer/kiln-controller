@@ -29,7 +29,7 @@ currency_type   = "$"   # Currency Symbol to show when calculating cost to run j
 
 # Switches zero-cross solid-state-relay
 gpio_heat = 23  # this is the BCM address for GPIO 4 
-heater_invert = 0 # switches the polarity of the heater control
+heater_invert = 1 # switches the polarity of the heater control
 
 ### Thermocouple Adapter selection:
 #   max31855 - bitbang SPI interface
