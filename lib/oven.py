@@ -4,6 +4,7 @@ import random
 import datetime
 import logging
 import json
+# from profile import Profile
 
 import config
 
@@ -56,6 +57,11 @@ class Oven (threading.Thread):
         self.daemon = True
         self.simulate = simulate
         self.time_step = time_step
+        self.segment = 0
+        self.segmentID = 0
+        self.segStart = 0
+        self.segDuration = 0
+        self.ovenWatcher = None
         self.reset()
         if simulate:
             self.temp_sensor = TempSensorSimulate(self,
@@ -73,19 +79,29 @@ class Oven (threading.Thread):
     def reset(self):
         self.profile = None
         self.start_time = 0
+        self.segment = 0
+        self.segmentID = 0
+        self.segStart = 0
+        self.segDuration = 0
         self.runtime = 0
         self.totaltime = 0
         self.target = 0
         self.state = Oven.STATE_IDLE
+        self.ovenWatcher = None
         self.set_heat(False)
         self.pid = PID(ki=config.pid_ki, kd=config.pid_kd, kp=config.pid_kp)
 
-    def run_profile(self, profile, startat=0):
+    def run_profile(self, profile, ovenWatcher, startat=0):
         log.info("Running schedule %s" % profile.name)
         self.profile = profile
-        self.totaltime = profile.get_duration()
+        self.ovenWatcher = ovenWatcher
+        self.totaltime = profile.duration
+        self.segmentID = 0
+        self.segment = profile.segments[self.segmentID]
+        self.segStart = datetime.datetime.now()
+        self.segDuration = 0
         self.state = Oven.STATE_RUNNING
-        self.start_time = datetime.datetime.now()
+        self.start_time = self.segStart
         self.startat = startat * 60
         log.info("Starting")
 
@@ -101,16 +117,32 @@ class Oven (threading.Thread):
             if self.state == Oven.STATE_RUNNING:
                 if self.simulate:
                     self.runtime += 0.5
+                    self.segStart += 0.5
                 else:
                     runtime_delta = datetime.datetime.now() - self.start_time
+                    segtime_delta = datetime.datetime.now() - self.segStart
                     if self.startat > 0:
-                        self.runtime = self.startat + runtime_delta.total_seconds();
+                        self.runtime = self.startat + runtime_delta.total_seconds()
                     else:
                         self.runtime = runtime_delta.total_seconds()
 
-                # update the target temp value based on where we are in the firing schedule
-                self.target = self.profile.get_target_temperature(self.runtime)
+                    self.segtime = segtime_delta.total_seconds()
 
+                curTemp = self.temp_sensor.temperature + config.thermocouple_offset
+
+
+                # check to see which segment we are on
+                if curTemp >= self.segment["targetTemp"]:
+                    self.segmentID += 1
+                    self.segStart = datetime.datetime.now()
+                    self.segtime = 0
+                    self.segment = self.profile.segments[self.segmentID]
+
+                print("\novenWatcher log:")
+
+                # update the target temp value based on where we are in the firing schedule
+                self.target = self.ovenWatcher.getTargetTemperature(self.segmentID, curTemp)
+                print("new target: " + str(self.target))
                 pid = self.pid.compute(self.target, self.temp_sensor.temperature + config.thermocouple_offset)
 
                 # set heat_on to 0.0
@@ -180,10 +212,11 @@ class Oven (threading.Thread):
                else:
                  GPIO.output(config.gpio_heat, GPIO.LOW)
 
-    # sends state info to front end
+    # sends this to Ovenwatcher who sends it to the front end
     def get_state(self):
         state = {
             'runtime': self.runtime,
+            'segment': self.segmentID,
             'temperature': self.temp_sensor.temperature + config.thermocouple_offset,
             'target': self.target,
             'state': self.state,
@@ -280,46 +313,6 @@ class TempSensorSimulate(TempSensor):
             time.sleep(self.sleep_time)
 
 
-class Profile():
-    def __init__(self, json_data):
-        obj = json.loads(json_data)
-        self.name = obj["name"]
-        self.data = sorted(obj["data"])
-
-    def get_duration(self):
-        return max([t for (t, x) in self.data])
-
-    def get_surrounding_points(self, time):
-        if time > self.get_duration():
-            return (None, None)
-
-        prev_point = None
-        next_point = None
-
-        for i in range(len(self.data)):
-            if time < self.data[i][0]:
-                prev_point = self.data[i-1]
-                next_point = self.data[i]
-                break
-
-        return (prev_point, next_point)
-
-    def is_rising(self, time):
-        (prev_point, next_point) = self.get_surrounding_points(time)
-        if prev_point and next_point:
-            return prev_point[1] < next_point[1]
-        else:
-            return False
-
-    def get_target_temperature(self, time):
-        if time > self.get_duration():
-            return 0
-
-        (prev_point, next_point) = self.get_surrounding_points(time)
-
-        incl = float(next_point[1] - prev_point[1]) / float(next_point[0] - prev_point[0])
-        temp = prev_point[1] + (time - prev_point[0]) * incl
-        return temp
 
 
 class PID():
