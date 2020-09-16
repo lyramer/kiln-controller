@@ -44,16 +44,40 @@ graph.live =
 
 function updateProfile(id)
 {
-    selected_profile = id;
+    selected_profile = profiles[id];
     selected_profile_name = profiles[id].name;
-    var job_seconds = profiles[id].data.length === 0 ? 0 : parseInt(profiles[id].data[profiles[id].data.length-1][0]);
+    let segments = selected_profile.data;
+    var job_seconds = 0;
+    
+    // new type of profile that runs based on ramp and target rather than PID and time
+    if (selected_profile.type == "newProfile") {
+
+        job_seconds = selected_profile.totalTime
+
+        // creating graph which is a set of points where x is time and y is temp
+        let graph_data = segments.map(segment => [segment.startTime, segment.startTemp]);
+
+        // grab the last point on the graph (the ending temp and time)
+        let lastSeg = segments[segments.length - 1];
+        graph_data.push([job_seconds, lastSeg.targetTemp]);
+        
+        // populate the graph
+        graph.profile.data = graph_data;
+
+    } else {
+        job_seconds = selected_profile.data.length === 0 ? 0 : parseInt(selected_profile.data[selected_profile.data.length-1][0]);
+        graph.profile.data = selected_profile.data;
+
+    }
+
+    // estimate costs & total time
     var kwh = (3850*job_seconds/3600/1000).toFixed(2);
     var cost =  (kwh*kwh_rate).toFixed(2);
     var job_time = new Date(job_seconds * 1000).toISOString().substr(11, 8);
-    $('#sel_prof').html(profiles[id].name);
+
+    $('#sel_prof').html(selected_profile.name);
     $('#sel_prof_eta').html(job_time);
     $('#sel_prof_cost').html(kwh + ' kWh ('+ currency_type +': '+ cost +')');
-    graph.profile.data = profiles[id].data;
     graph.plot = $.plot("#graph_container", [ graph.profile, graph.live ] , getOptions());
 }
 
@@ -103,6 +127,7 @@ function updateProfileTable()
     var dps = 0;
     var slope = "";
     var color = "";
+    var temp = graph.profile.data[i][1]
 
     var html = '<h3>Schedule Points</h3><div class="table-responsive" style="scroll: none"><table class="table table-striped">';
         html += '<tr><th style="width: 50px">#</th><th>Target Time in ' + time_scale_long+ '</th><th>Target Temperature in °'+temp_scale_display+'</th><th>Slope in &deg;'+temp_scale_display+'/'+time_scale_slope+'</th><th></th></tr>';
@@ -117,7 +142,7 @@ function updateProfileTable()
 
         html += '<tr><td><h4>' + (i+1) + '</h4></td>';
         html += '<td><input type="text" class="form-control" id="profiletable-0-'+i+'" value="'+ timeProfileFormatter(graph.profile.data[i][0],true) + '" style="width: 60px" /></td>';
-        html += '<td><input type="text" class="form-control" id="profiletable-1-'+i+'" value="'+ graph.profile.data[i][1] + '" style="width: 60px" /></td>';
+        html += '<td><input type="text" class="form-control" id="profiletable-1-'+i+'" value="'+ temp + '" style="width: 60px" /></td>';
         html += '<td><div class="input-group"><span class="glyphicon glyphicon-circle-arrow-' + slope + ' input-group-addon ds-trend" style="background: '+color+'"></span><input type="text" class="form-control ds-input" readonly value="' + formatDPS(dps) + '" style="width: 100px" /></div></td>';
         html += '<td>&nbsp;</td></tr>';
     }
@@ -205,10 +230,11 @@ function timeTickFormatter(val)
 
 function runTask()
 {
+    console.log(selected_profile);
     var cmd =
     {
         "cmd": "RUN",
-        "profile": profiles[selected_profile]
+        "profile": selected_profile.name
     }
 
     graph.live.data = [];
@@ -308,6 +334,19 @@ function delPoint()
     updateProfileTable();
 }
 
+function toFahrenheit(temp) {
+    return temp * (9/5) + 32;
+}
+
+function toCelsius(temp) {
+    if (temp_scale_display == 'f' || temp_scale_display == 'F') {
+        return temp * (5/9) - 32;
+    } else {
+        return temp;
+    }
+}
+
+
 function toggleTable()
 {
     if($('#profile_table').css('display') == 'none')
@@ -352,6 +391,10 @@ function saveProfile()
         last = rawdata[i][0];
     }
 
+    data = data.map(entry => {
+       return toCelsius(entry[1])
+    })
+
     var profile = { "type": "profile", "data": data, "name": name }
     var put = { "cmd": "PUT", "profile": profile }
 
@@ -394,7 +437,8 @@ function getOptions()
       font:
       {
         size: 14,
-        lineHeight: 14,        weight: "normal",
+        lineHeight: 14,        
+        weight: "normal",
         family: "Digi",
         variant: "small-caps",
         color: "rgba(216, 211, 197, 0.85)"
@@ -578,17 +622,15 @@ $(document).ready(function()
         {
             console.log (e.data);
             x = JSON.parse(e.data);
-            temp_scale = x.temp_scale;
+            temp = (temp_scale_display == 'F' || temp_scale_display == 'f') ? toFahrenheit(x.temp_scale) : x.temp_scale;
             time_scale_slope = x.time_scale_slope;
             time_scale_profile = x.time_scale_profile;
             kwh_rate = x.kwh_rate;
             currency_type = x.currency_type;
-            
-            if (temp_scale == "c") {temp_scale_display = "C";} else {temp_scale_display = "F";}
-              
+                          
 
-            $('#act_temp_scale').html('º'+temp_scale_display);
-            $('#target_temp_scale').html('º'+temp_scale_display);
+            $('#act_temp_scale').html('º'+temp_scale_display.toUpperCase());
+            $('#target_temp_scale').html('º'+temp_scale_display.toUpperCase());
 
             switch(time_scale_profile){
                 case "s":
@@ -656,33 +698,31 @@ $(document).ready(function()
             //the message is an array of profiles
             //FIXME: this should be better, maybe a {"profiles": ...} container?
             profiles = message;
+            console.log(profiles);
             //delete old options in select
             $('#e2').find('option').remove().end();
+
+
             // check if current selected value is a valid profile name
-            // if not, update with first available profile name
             var valid_profile_names = profiles.map(function(a) {return a.name;});
-            if (
-              valid_profile_names.length > 0 && 
-              $.inArray(selected_profile_name, valid_profile_names) === -1
-            ) {
+            
+            // if not, update with first available profile name
+            if (valid_profile_names.includes(selected_profile_name)) {
               selected_profile = 0;
               selected_profile_name = valid_profile_names[0];
             }            
 
             // fill select with new options from websocket
-            for (var i=0; i<profiles.length; i++)
-            {
-                var profile = profiles[i];
-                //console.log(profile.name);
+            profiles.forEach((profile , i) => {
                 $('#e2').append('<option value="'+i+'">'+profile.name+'</option>');
 
-                if (profile.name == selected_profile_name)
-                {
+                if (profile.name == selected_profile_name) {
                     selected_profile = i;
                     $('#e2').select2('val', i);
                     updateProfile(i);
                 }
-            }
+            })
+
         };
 
 

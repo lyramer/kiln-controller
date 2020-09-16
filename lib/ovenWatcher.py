@@ -1,10 +1,12 @@
 import threading,logging,json,time,datetime
+from pathlib import Path
 from oven import Oven
 log = logging.getLogger(__name__)
 
 class OvenWatcher(threading.Thread):
     def __init__(self,oven):
         self.last_profile = None
+        self.firing_log = {}
         self.last_log = []
         self.started = None
         self.recording = False
@@ -46,15 +48,34 @@ class OvenWatcher(threading.Thread):
         self.last_profile = profile
         self.last_log = []
         self.started = datetime.datetime.now()
+        script_location = Path(__file__).absolute().parent
+        fileName = self.started.strftime("%Y%m%d-%H%M") + ".json"
+        logPath = script_location / 'logs' / fileName
+        print("logPath:" + str(logPath))
         self.recording = True
         #we just turned on, add first state for nice graph
         self.last_log.append(self.oven.get_state())
+
+        # creating a json firing log
+        self.firing_log["profile"] = {
+            'name': profile.name,
+            'segments': profile.segments,
+            'date': self.started.strftime("%B %d %Y"),
+            'startTime': self.started.strftime("%H %M"),
+            'endTime': None,
+        }
+        
+        self.firing_log["data"]  = self.last_log
+
+        # writing the log to a json file with the timestamp as a name
+        with open(logPath, 'w+') as outfile:
+            outfile.write(json.dumps(self.firing_log, indent=4))
 
     def add_observer(self,observer):
         if self.last_profile:
             p = {
                 "name": self.last_profile.name,
-                "data": self.last_profile.data, 
+                "data": self.last_profile.segments, 
                 "type" : "profile"
             }
         else:
@@ -66,7 +87,6 @@ class OvenWatcher(threading.Thread):
             'log': self.lastlog_subset(),
             #'started': self.started
         }
-        print (backlog)
         backlog_json = json.dumps(backlog)
         try:
             print (backlog_json)
@@ -75,6 +95,61 @@ class OvenWatcher(threading.Thread):
             log.error("Could not send backlog to new observer")
         
         self.observers.append(observer)
+
+    def getSegmentLog(self, segmentID, interval):
+
+        # grab the entire log for the chosen segment
+        segLog = [entry for entry in self.last_log if entry['segment'] == segmentID]
+
+        curState = self.oven.get_state()
+
+        # if the interval is longer than the segment's current runtime
+        if (curState["runtime"] <= interval):
+            return segLog
+        # otherwise only grab the most recent entries that fall within the timespan
+        else:
+            timespan = curState["runtime"] - interval
+            print("timespan: " + str(timespan))
+            return [entry for entry in segLog if entry['runtime'] >= timespan]
+
+    def getTargetTemperature(self, segmentID, curTemp):
+        # define the interval (in seconds) that you want to look at for the change in temp
+        interval = 600 # currently set to 10 min
+
+        curSegment = self.last_profile.segments[segmentID]
+        segmentLog = self.getSegmentLog(segmentID, interval)
+        print("\ngetTargetTemperature: ")
+        print("curSegment: " + str(curSegment))
+        
+
+        if len(segmentLog) > 1:
+
+            # calculate the different in temp from the most recent vs the oldest log entry that's within the timespan
+            tempDelta = segmentLog[-1]["temperature"] - segmentLog[0]["temperature"] 
+
+            # since the actual time elapsed between the two log entries may differ from the idealized timespan,
+            # best to calculate that too!
+            timeDelta = segmentLog[-1]["runtime"] - segmentLog[0]["runtime"] 
+
+
+            # since we define rise as degrees per hour, multiply by 3600 to get the temp delta per hour
+            curDelta = (tempDelta / timeDelta) * 3600 if timeDelta > 0 else 0
+
+            # if we're rising faster than our limit, slow down
+            # get the ideal temperature for right now based on the temp data of 10 min ago + rise
+            newBestTemperature = segmentLog[0]["temperature"] + (curSegment["rise"] / 3600) * timeDelta
+            print("hypothetical temp: " + str(newBestTemperature))
+            if curDelta > curSegment["rise"]:
+                return newBestTemperature
+
+
+        newBestTarget = (curSegment["rise"] / 3600) * interval
+        print("curRise: " + str(curSegment["rise"]))
+        print("new Target: " + str(newBestTarget + curTemp))
+        return newBestTarget + curTemp
+
+
+
 
     def notify_all(self,message):
         message_json = json.dumps(message)

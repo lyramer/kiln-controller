@@ -1,0 +1,49 @@
+{
+    "profile": {
+        "name": "new-prof",
+        "segments": [
+            {
+                "startTime": 0,
+                "startTemp": 21,
+                "rise": 40,
+                "targetTemp": 70,
+                "minDuration": 4380
+            },
+            {
+                "startTime": 4380,
+                "startTemp": 70,
+                "rise": 0,
+                "targetTemp": 70,
+                "minDuration": 1800
+            },
+            {
+                "startTime": 6180,
+                "startTemp": 70,
+                "rise": -5,
+                "targetTemp": 60,
+                "minDuration": 7200
+            },
+            {
+                "startTime": 13380,
+                "startTemp": 60,
+                "rise": 0,
+                "targetTemp": 60,
+                "minDuration": 300
+            }
+        ],
+        "date": "September 15 2020",
+        "startTime": "20 50",
+        "endTime": null
+    },
+    "data": [
+        {
+            "runtime": 0,
+            "segment": 0,
+            "temperature": 25.0,
+            "target": 0,
+            "state": "RUNNING",
+            "heat": 0.0,
+            "totaltime": 13680
+        }
+    ]
+}

@@ -30,7 +30,8 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, script_dir + '/lib/')
 profile_path = os.path.join(script_dir, "storage", "profiles")
 
-from oven import Oven, Profile
+from oven import Oven
+from profile import Profile
 from ovenWatcher import OvenWatcher
 
 app = bottle.Bottle()
@@ -65,7 +66,7 @@ def handle_api():
         # FIXME juggling of json should happen in the Profile class
         profile_json = json.dumps(profile)
         profile = Profile(profile_json)
-        oven.run_profile(profile,startat=startat)
+        oven.run_profile(profile,ovenWatcher, startat=startat)
         ovenWatcher.record(profile)
 
     if bottle.request.json['cmd'] == 'stop':
@@ -82,12 +83,12 @@ def find_profile(wanted):
     #load all profiles from disk
     profiles = get_profiles()
     json_profiles = json.loads(profiles)
+    log.info("getting profile: " + wanted)
+    log.info(next((profile for profile in json_profiles if profile["name"] == wanted), None))
 
-    # find the wanted profile
-    for profile in json_profiles:
-        if profile['name'] == wanted:
-            return profile
-    return None
+    # deliver the wanted profile
+    return Profile(next((profile for profile in json_profiles if profile["name"] == wanted), None))
+
 
 @app.route('/picoreflow/:filename#.*#')
 def send_static(filename):
@@ -114,18 +115,17 @@ def handle_control():
             msgdict = json.loads(message)
             if msgdict.get("cmd") == "RUN":
                 log.info("RUN command received")
+                profile_name = msgdict.get('profile')
+                if profile_name:
+                   profile = find_profile(profile_name)
+                oven.run_profile(profile, ovenWatcher)
+                ovenWatcher.record(profile)
+            elif msgdict.get("cmd") == "SIMULATE":
+                log.info("SIMULATE command received")
                 profile_obj = msgdict.get('profile')
                 if profile_obj:
                     profile_json = json.dumps(profile_obj)
                     profile = Profile(profile_json)
-                oven.run_profile(profile)
-                ovenWatcher.record(profile)
-            elif msgdict.get("cmd") == "SIMULATE":
-                log.info("SIMULATE command received")
-                #profile_obj = msgdict.get('profile')
-                #if profile_obj:
-                #    profile_json = json.dumps(profile_obj)
-                #    profile = Profile(profile_json)
                 #simulated_oven = Oven(simulate=True, time_step=0.05)
                 #simulation_watcher = OvenWatcher(simulated_oven)
                 #simulation_watcher.add_observer(wsock)
@@ -198,6 +198,7 @@ def handle_config():
     log.info("websocket (config) closed")
 
 
+# the status socket is what continually updates your page with new info about temp and firing time.
 @app.route('/status')
 def handle_status():
     wsock = get_websocket_from_request()
@@ -213,6 +214,7 @@ def handle_status():
 
 
 def get_profiles():
+    print("getting profiles....\n")
     try:
         profile_files = os.listdir(profile_path)
     except:
@@ -221,6 +223,7 @@ def get_profiles():
     for filename in profile_files:
         with open(os.path.join(profile_path, filename), 'r') as f:
             profiles.append(json.load(f))
+    print(profiles)
     return json.dumps(profiles)
 
 

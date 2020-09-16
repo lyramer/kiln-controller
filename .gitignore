@@ -9,3 +9,5 @@ storage/profiles
 #config.py
 .idea/*
 venv/*
+logs/*
+*.old
