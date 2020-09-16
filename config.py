@@ -59,7 +59,7 @@ sensor_time_wait = 5
 #   PID parameters
 
 pid_kp = 25  # Proportional
-pid_ki = 1088  # Integration
+pid_ki = 1000  # Integration
 pid_kd = 217  # Derivative was 217
 
 
