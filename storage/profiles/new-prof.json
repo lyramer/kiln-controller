@@ -1,0 +1,44 @@
+{
+    "data": [
+        {
+            "startTime" : 0,
+            "startTemp" : 21,
+            "rise": 40,
+            "targetTemp": 70,
+            "minDuration": 4380
+        },{       
+            "startTime" : 4380,
+            "startTemp" : 70,
+            "rise": 0,
+            "targetTemp": 70,
+            "minDuration": 1800
+        },{       
+            "startTime" : 6180,
+            "startTemp" : 70,
+            "rise": -5,
+            "targetTemp": 60,
+            "minDuration": 7200
+        },{       
+            "startTime" : 13380,
+            "startTemp" : 60,
+            "rise": 0,
+            "targetTemp": 60,
+            "minDuration": 300
+        }
+    ], 
+    "simplified": [
+        {
+            "rise": 40,
+            "target": 70,
+            "hold": 30
+        },
+        {
+            "rise": -5,
+            "target": 60,
+            "hold": 5
+        }
+    ],
+    "totalTime": 13680,
+    "type": "newProfile", 
+    "name": "new-prof"
+}
