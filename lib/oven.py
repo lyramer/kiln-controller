@@ -132,7 +132,11 @@ class Oven (threading.Thread):
 
 
                 # check to see which segment we are on
-                if curTemp >= self.segment.targetTemp:
+                if (
+                    (curTemp >= self.segment.targetTemp and self.segment.rise > 0) or 
+                    (curTemp <= self.segment.targetTemp and self.segment.rise < 0) or
+                    (self.segment.rise == 0 and self.segTime >= minDuration)
+                ):
                     # housekeepint for starting a new segment
                     self.segmentID += 1
                     self.segStart = datetime.datetime.now()
