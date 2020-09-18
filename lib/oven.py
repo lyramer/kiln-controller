@@ -116,8 +116,8 @@ class Oven (threading.Thread):
 
             if self.state == Oven.STATE_RUNNING:
                 if self.simulate:
-                    self.runtime += 0.5
-                    self.segStart += 0.5
+                    self.runtime += 1
+                    self.segStart += 1
                 else:
                     runtime_delta = datetime.datetime.now() - self.start_time
                     segtime_delta = datetime.datetime.now() - self.segStart
@@ -132,16 +132,18 @@ class Oven (threading.Thread):
 
 
                 # check to see which segment we are on
-                if curTemp >= self.segment["targetTemp"]:
+                if curTemp >= self.segment.targetTemp:
+                    # housekeepint for starting a new segment
                     self.segmentID += 1
                     self.segStart = datetime.datetime.now()
                     self.segtime = 0
                     self.segment = self.profile.segments[self.segmentID]
+                    self.ovenWatcher.firingLog["segLog"][self.segmentID]["segStartTime"] = self.segStart
 
-                print("\novenWatcher log:")
 
                 # update the target temp value based on where we are in the firing schedule
-                self.target = self.ovenWatcher.getTargetTemperature(self.segmentID, curTemp)
+                self.target = self.ovenWatcher.getTargetTemperature(self.segmentID, curTemp, self.segStart)
+
                 print("new target: " + str(self.target))
                 pid = self.pid.compute(self.target, self.temp_sensor.temperature + config.thermocouple_offset)
 

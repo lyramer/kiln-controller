@@ -223,7 +223,6 @@ def get_profiles():
     for filename in profile_files:
         with open(os.path.join(profile_path, filename), 'r') as f:
             profiles.append(json.load(f))
-    print(profiles)
     return json.dumps(profiles)
 
 

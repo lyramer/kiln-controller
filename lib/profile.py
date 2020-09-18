@@ -3,10 +3,16 @@ import json
 class Profile():
     def __init__(self, json_data):
         profile = json_data
+
+        # sort and attach ID's to the segments
+        segments = sorted(profile["data"], key=lambda k: k['startTime'])
+        segments = [dict(seg, id=index) for index, seg in enumerate(segments)]
+
         self.name = profile["name"]
         self.type = profile["type"]
         self.duration = profile["totalTime"]
-        self.segments = sorted(profile["data"], key=lambda k: k['startTime'])
+        self.segments = [Segment(seg) for seg in segments]
+
 
 
     def get_surrounding_points(self, time):
@@ -28,17 +34,28 @@ class Profile():
         else:
             return False
 
-    def get_target_temperature(self, segmentID, segTime):
-        
-        curSegment = self.segments[segmentID]
 
-        # needs reworking
-        print("curSegment minduration " + str(curSegment["minDuration"]))
-        incl = float((curSegment["targetTemp"] + curSegment["startTemp"])/ curSegment["minDuration"])
-        print("segTime: " + str(segTime))
-        print("incl: " + str(incl))
-        temp = (segTime * incl) + curSegment["startTemp"]
+class Segment():
+    def __init__(self, segInfo):
+        self.id = int(segInfo["id"])
+        self.startTime = segInfo["startTime"]
+        self.startTemp = segInfo["startTemp"]
+        self.targetTemp = segInfo["targetTemp"]
+        self.rise = segInfo["rise"]
+        self.minDuration = segInfo["minDuration"]
+    
+    def __eq__(self, other):
+        return self.id == other.id
+    
+    def __str__(self):
+        return ('''
+        Segment %d:
+            startTime: %d
+            startTemp: %d
+            targetTemp: %d
+            rise: %d
+            minDuration: %.2f minutes
+        ''' % (self.id, self.startTime, self.startTemp, self.targetTemp, self.rise, self.minDuration / 60))
 
-        # incl = float(next_point[1] - prev_point[1]) / float(next_point[0] - prev_point[0])
-        # temp = prev_point[1] + (time - prev_point[0]) * incl
-        return temp
+    def __repr__(self):
+        return str(self)

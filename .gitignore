@@ -6,6 +6,7 @@
 .DStore/
 thumbs.db
 storage/profiles
+storage/old/
 #config.py
 .idea/*
 venv/*

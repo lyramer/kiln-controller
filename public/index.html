@@ -5,15 +5,15 @@
  <title>Kiln Controller</title>
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
- <script src="assets/js/jquery-1.10.2.min.js"></script>
- <script src="assets/js/jquery.event.drag-2.2.js"></script>
- <script src="assets/js/jquery.flot.js"></script>
- <script src="assets/js/jquery.flot.resize.js"></script>
- <script src="assets/js/jquery.flot.draggable.js"></script>
- <script src="assets/js/bootstrap.min.js"></script>
- <script src="assets/js/jquery.bootstrap-growl.min.js"></script>
- <script src="assets/js/select2.min.js"></script>
- <script src="assets/js/picoreflow.js"></script>
+ <script src="assets/js/lib/jquery-1.10.2.min.js"></script>
+ <script src="assets/js/lib/jquery.event.drag-2.2.js"></script>
+ <script src="assets/js/lib/jquery.flot.js"></script>
+ <script src="assets/js/lib/jquery.flot.resize.js"></script>
+ <script src="assets/js/lib/jquery.flot.draggable.js"></script>
+ <script src="assets/js/lib/bootstrap.min.js"></script>
+ <script src="assets/js/lib/jquery.bootstrap-growl.min.js"></script>
+ <script src="assets/js/lib/select2.min.js"></script>
+ <script type="module" src="assets/js/picoreflow.js"></script>
 
  <link rel="stylesheet" href="assets/css/bootstrap.min.css"/>
  <link rel="stylesheet" href="assets/css/bootstrap-theme.min.css"/>
@@ -50,7 +50,7 @@
   <div class="panel panel-default">
    <div class="panel-heading">
     <div id="profile_selector" class="pull-left">
-     <select id="e2" class="select2" style="margin-top: 4px"></select>
+     <select id="profile-select" class="select2" style="margin-top: 4px"></select>
      <button id="btn_edit" type="button" class="btn btn-default" onclick="enterEditMode()"><span class="glyphicon glyphicon-edit"></span></button>
      <button id="btn_new" type="button" class="btn btn-default" onclick="enterNewMode(selected_profile)"><span class="glyphicon glyphicon-plus"></span></button>
     </div>
@@ -66,7 +66,6 @@
       <span class="input-group-addon">Schedule Name</span>
       <input id="form_profile_name" type="text" class="form-control" />
       <span class="input-group-btn">
-        <button class="btn btn-success" type="button" onclick="saveProfile();">Save</button>
         <button id="btn_exit" type="button" class="btn btn-default" onclick="leaveEditMode()"><span class="glyphicon glyphicon-remove"></span></button>
       </span>
      </div>
@@ -86,7 +85,7 @@
    <div class="panel-body">
     <div id="graph_container" class="graph"></div>
    </div>
-   <div id="profile_table" class="panel-footer" style="display:none;"></div>
+   <div id="profile-table" class="panel-footer" style="display:none;"></div>
   </div>
  </div>
 
