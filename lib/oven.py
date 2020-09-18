@@ -267,7 +267,8 @@ class TempSensorReal(TempSensor):
                 try:
                     temp = self.thermocouple.get()
                 except Exception:
-                    log.exception("problem reading temp")
+                    log.exception("problem reading temp");
+                    
                 if temp > maxtemp:
                     maxtemp = temp
                 time.sleep(sleeptime)
