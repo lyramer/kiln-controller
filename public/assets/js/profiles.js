@@ -67,6 +67,7 @@ function deleteProfile(ws_storage, profiles, profileToDel, graph) {
 
 }
 
+export function createProfile(profiles, curProfileName, config) {};
 
 
 export function newRow(scheduleName, index, target, ramp, hold, config) {

@@ -1,4 +1,4 @@
-const animals = [
+export const animals = [
     'pony', 
     'donkey', 
     'partridge', 
@@ -26,7 +26,7 @@ const animals = [
     'earwig'
 ]
 
-const adjectives = [
+export const adjectives = [
     'parsimonious', 
     'rich', 
     'friendly', 
@@ -59,7 +59,7 @@ const adjectives = [
     'delightful',
 ]
 
-const colours = [
+export const colours = [
     'green',
     'apricot',
     'teal',
