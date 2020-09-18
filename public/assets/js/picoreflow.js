@@ -340,8 +340,8 @@ $(document).ready(function() {
                     graph.plot = updateGraph(graph)
 
 
-                    left = parseInt(x.totaltime-x.runtime);
-                    eta = new Date(left * 1000).toISOString().substr(11, 8);
+                    let left = parseInt(x.totaltime-x.runtime);
+                    let eta = new Date(left * 1000).toISOString().substr(11, 8);
 
                     updateProgress(parseFloat(x.runtime)/parseFloat(x.totaltime)*100);
                     $('#state').html('<span class="glyphicon glyphicon-time" style="font-size: 22px; font-weight: normal"></span><span style="font-family: Digi; font-size: 40px;">' + eta + '</span>');
