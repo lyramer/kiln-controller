@@ -198,11 +198,9 @@ class Oven (threading.Thread):
                if config.heater_invert:
                  GPIO.output(config.gpio_heat, GPIO.LOW)
                  time.sleep(self.time_step * value)
-                 GPIO.output(config.gpio_heat, GPIO.HIGH)   
                else:
                  GPIO.output(config.gpio_heat, GPIO.HIGH)
                  time.sleep(self.time_step * value)
-                 GPIO.output(config.gpio_heat, GPIO.LOW)
             else:
                  #for runs that are simulations
                  time.sleep(self.time_step * value)
