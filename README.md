@@ -82,7 +82,7 @@ Another beginner's note: according to my RPi guru, RPi's thrive on being abruptl
     $ virtualenv -p python3 venv
     $ source venv/bin/activate
     $ pip install --upgrade setuptools
-    $ pip install greenlet bottle gevent gevent-websocket
+    $ pip install greenlet bottle gevent gevent-websocket jsonpickle
 
 *Note: The above steps work on a Ubuntu install on your RPi if you prefer*
 
