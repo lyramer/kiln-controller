@@ -18,7 +18,7 @@ try:
         from max31855 import MAX31855, MAX31855Error
         log.info("using MAX31855")
     if config.max31855spi:
-        import Adafruit_GPIO.SPI as SPI
+        # import Adafruit_GPIO.SPI as SPI
         from max31855spi import MAX31855SPI, MAX31855SPIError
         log.info("using MAX31855SPI")
         spi_reserved_gpio = [7, 8, 9, 10, 11]
