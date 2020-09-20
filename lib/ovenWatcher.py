@@ -59,14 +59,13 @@ class OvenWatcher(threading.Thread):
 
 
     def logNewSegment(self, segStartTime, segID, curTemp):
-        
-        self.firingLog["segLog"].append(
-            segID : {
-                'segStartTime': segStartTime,
-                'data': []
-                'segStartTemp': curTemp
-            }
-        )
+        newSegment = 
+        self.firingLog["segLog"][segID] = {
+            'segStartTime': segStartTime,
+            'data': []
+            'segStartTemp': curTemp
+        }
+
 
 
     def record(self, profile):
