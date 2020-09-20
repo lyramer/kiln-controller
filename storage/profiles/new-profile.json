@@ -1,1 +1,16 @@
-{"data": [{"startTime": 0, "startTemp": 21, "rise": 407, "targetTemp": 80, "minDuration": 522}, {"startTime": 522, "startTemp": 80, "rise": 0, "targetTemp": 80, "minDuration": 1800}, {"startTime": 2322, "startTemp": 80, "rise": -5, "targetTemp": 60, "minDuration": 14400}, {"startTime": 16722, "startTemp": 60, "rise": 0, "targetTemp": 60, "minDuration": 300}], "simplified": [{"rise": 407, "target": 80, "hold": 30, "ramp": 100}, {"rise": -5, "target": 60, "hold": 5}], "totalTime": 17022, "name": "new-profile"}
+{
+    "data": 
+        [
+            {"startTime": 0, "startTemp": 21, "rise": 407, "targetTemp": 80, "minDuration": 522}, 
+            {"startTime": 522, "startTemp": 80, "rise": 0, "targetTemp": 80, "minDuration": 1800}, 
+            {"startTime": 2322, "startTemp": 80, "rise": -5, "targetTemp": 60, "minDuration": 14400}, 
+            {"startTime": 16722, "startTemp": 60, "rise": 0, "targetTemp": 60, "minDuration": 300}  
+        ], 
+    "simplified": 
+        [
+            {"rise": 407, "target": 80, "hold": 30}, 
+            {"rise": -5, "target": 60, "hold": 5}
+        ], 
+    "totalTime": 17022, 
+    "name": "new-profile"
+}
