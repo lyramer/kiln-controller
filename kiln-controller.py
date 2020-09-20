@@ -45,6 +45,7 @@ def index():
 @app.post('/api')
 def handle_api():
     log.info("/api is alive")
+    log.info("bottle request")
     log.info(bottle.request.json)
 
     # run a kiln schedule
@@ -168,6 +169,7 @@ def handle_storage():
             elif msgdict.get("cmd") == "PUT":
                 log.info("PUT command received")
                 profile_obj = msgdict.get('profile')
+                print("writing {} to file".format(profile_obj))
                 #force = msgdict.get('force', False)
                 force = True
                 if profile_obj:
