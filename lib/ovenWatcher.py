@@ -15,7 +15,6 @@ class OvenWatcher(threading.Thread):
         self.daemon = True
         self.oven = oven
         self.start()
-        self.logNewSegment()
 
 # FIXME - need to save runs of schedules in near-real-time
 # FIXME - this will enable re-start in case of power outage
