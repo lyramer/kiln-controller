@@ -9,7 +9,6 @@ class Profile():
         segments = [dict(seg, id=index) for index, seg in enumerate(segments)]
 
         self.name = profile["name"]
-        self.type = profile["type"]
         self.duration = profile["totalTime"]
         self.segments = [Segment(seg) for seg in segments]
 
