@@ -4,7 +4,7 @@ import board
 import busio
 import digitalio
 import logging
-from Adafruit_MAX31855 import MAX31855
+from adafruit_max31855 import MAX31855
 spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 cs = digitalio.DigitalInOut(board.D17)
 
@@ -15,7 +15,7 @@ class MAX31855SPI(object):
 
     '''
     def __init__(self, timeStep):
-        self.max31855 = MAX31855.MAX31855(spi, cs)
+        self.max31855 = MAX31855(spi, cs)
         self.log = logging.getLogger(__name__)
         self.tries = 0
         self.maxTries = 10
