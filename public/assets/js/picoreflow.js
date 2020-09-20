@@ -145,7 +145,7 @@ function enterEditMode() {
             tempProfile = onProfileChange(tempProfile, inputID, parseInt(val), config)
         }
 
-        console.log(tempProfile)
+        //console.log(tempProfile)
     });
 }
 window.enterEditMode = enterEditMode
@@ -173,6 +173,8 @@ function saveProfile(profileName) {
     }
 
     let newProfile = tempProfile;
+
+    console.log("saving new profile", tempProfile)
 
     // if the name was changed, delete the old profile data
     if (newProfile.name != profileName) {
@@ -286,8 +288,8 @@ $(document).ready(function() {
         };
 
         ws_status.onmessage = e => {
-            console.log("received status data")
-            console.log(e.data);
+            //console.log("received status data")
+            //console.log(e.data);
 
             let x = JSON.parse(e.data);
             if (x.type == "backlog") {

@@ -70,7 +70,7 @@ function deleteProfile(ws_storage, profiles, profileToDel, graph) {
 export function createProfile(profiles, curProfileName, config) {};
 
 
-export function newRow(scheduleName, index, target, ramp, hold, config) {
+export function newRow(scheduleName, index, target, rise, hold, config) {
     return `
         <div class="row">
             <div class="col-lg-1 col-sm-1"><h4>${index + 1}</h4></div>
@@ -85,9 +85,9 @@ export function newRow(scheduleName, index, target, ramp, hold, config) {
             <div class="col-lg-3 col-sm-12">
                 <input 
                     type="number" 
-                    class="form-control profile-table-ramp" 
-                    id="${scheduleName}:${index}:ramp"
-                    value="${config.tempScale == "F" ? ramp.toFahrenheit() : ramp}" 
+                    class="form-control profile-table-rise" 
+                    id="${scheduleName}:${index}:rise"
+                    value="${config.tempScale == "F" ? rise.toFahrenheit() : rise}" 
                 />
             </div>
             <div class="col-lg-3 col-sm-12">
@@ -113,7 +113,7 @@ export function editProfile(curProfile, config) {
             <div class="row">
                 <div class="col-lg-1 col-sm-1">Segment</div>
                 <div class="col-lg-3 col-sm-12">Target Temperature in °${config.tempScale}</div>
-                <div class="col-lg-3 col-sm-12">Ramp in &deg;${config.tempScale}/${config.timeScaleSlope}</div>
+                <div class="col-lg-3 col-sm-12">Rise in &deg;${config.tempScale}/${config.timeScaleSlope}</div>
                 <div class="col-lg-3 col-sm-12">Hold (in ${timeScale(config.timeScaleProfile)})</div>
             </div>
             `;
@@ -149,10 +149,15 @@ export function onProfileChange(tempProfile, inputID, val, config) {
     let segID = decodedID[1];
     let fieldType = decodedID[2];
 
+    console.log("changing " + fieldType + " to " + val + " in segment " + segID);
+    console.log(tempProfile)
+
     // update the profile object with the new value
     tempProfile.simplified[segID][fieldType] = val;
+
     
     tempProfile = calculateProfileData(tempProfile, config)
+    console.log(tempProfile)
 
     return tempProfile;
 }
