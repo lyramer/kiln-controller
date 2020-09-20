@@ -257,7 +257,7 @@ class TempSensorReal(TempSensor):
 
         if config.max31855spi:
             log.info("init MAX31855-spi")
-            self.thermocouple = MAX31855SPI(self.time_step))
+            self.thermocouple = MAX31855SPI(self.time_step)
 
     def run(self):
         while True:
