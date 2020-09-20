@@ -81,7 +81,7 @@ class Oven (threading.Thread):
         self.start_time = 0
         self.segment = 0
         self.segmentID = 0
-        self.segStart = 0
+        self.segStartTime = 0
         self.segDuration = 0
         self.runtime = 0
         self.totaltime = 0
@@ -98,10 +98,10 @@ class Oven (threading.Thread):
         self.totaltime = profile.duration
         self.segmentID = 0
         self.segment = profile.segments[self.segmentID]
-        self.segStart = datetime.datetime.now()
+        self.segStartTime = datetime.datetime.now()
         self.segDuration = 0
         self.state = Oven.STATE_RUNNING
-        self.start_time = self.segStart
+        self.start_time = self.segStartTime
         self.startat = startat * 60
         log.info("Starting")
 
@@ -117,10 +117,10 @@ class Oven (threading.Thread):
             if self.state == Oven.STATE_RUNNING:
                 if self.simulate:
                     self.runtime += 1
-                    self.segStart += 1
+                    self.segStartTime += 1
                 else:
                     runtime_delta = datetime.datetime.now() - self.start_time
-                    segtime_delta = datetime.datetime.now() - self.segStart
+                    segtime_delta = datetime.datetime.now() - self.segStartTime
                     if self.startat > 0:
                         self.runtime = self.startat + runtime_delta.total_seconds()
                     else:
@@ -139,10 +139,10 @@ class Oven (threading.Thread):
                 ):
                     # housekeeping for starting a new segment
                     self.segmentID += 1
-                    self.segStart = datetime.datetime.now()
+                    self.segStartTime = datetime.datetime.now()
                     self.segtime = 0
                     self.segment = self.profile.segments[self.segmentID]
-                    self.ovenWatcher.firingLog["segLog"][self.segmentID]["segStartTime"] = self.segStart
+                    self.ovenWatcher.logNewSegment(self.segStartTime, self.segmentID, curTemp)
 
 
                 # update the target temp value based on where we are in the firing schedule
