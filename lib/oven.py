@@ -59,7 +59,7 @@ class Oven (threading.Thread):
         self.time_step = time_step
         self.segment = 0
         self.segmentID = 0
-        self.segStart = 0
+        self.segStartTime = 0
         self.segDuration = 0
         self.ovenWatcher = None
         self.reset()
@@ -146,7 +146,7 @@ class Oven (threading.Thread):
 
 
                 # update the target temp value based on where we are in the firing schedule
-                self.target = self.ovenWatcher.getTargetTemperature(self.segmentID, curTemp, self.segStart)
+                self.target = self.ovenWatcher.getTargetTemperature(self.segmentID, curTemp, self.segStartTime)
 
                 print("new target: " + str(self.target))
                 pid = self.pid.compute(self.target, self.temp_sensor.temperature + config.thermocouple_offset)
