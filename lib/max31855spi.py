@@ -29,7 +29,8 @@ class MAX31855SPI(object):
         try:
             self.tempC = self.max31855.temperature
         except:
-            print("TC short to ground")
+            pass
+            #print("TC short to ground")
             
             
         return self.tempC
