@@ -15,6 +15,7 @@ class OvenWatcher(threading.Thread):
         self.daemon = True
         self.oven = oven
         self.start()
+        self.logNewSegment()
 
 # FIXME - need to save runs of schedules in near-real-time
 # FIXME - this will enable re-start in case of power outage
@@ -57,6 +58,15 @@ class OvenWatcher(threading.Thread):
         return self.lastLog[::every_nth]
 
 
+    def logNewSegment(self, segStartTime, segID, curTemp):
+        
+        self.firingLog["segLog"].append(
+            segID : {
+                'segStartTime': segStartTime,
+                'data': []
+                'segStartTemp': curTemp
+            }
+        )
 
 
     def record(self, profile):
