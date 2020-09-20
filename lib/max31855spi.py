@@ -32,7 +32,7 @@ class MAX31855SPI(object):
             print("TC short to ground")
             
             
-        return self.tempC()
+        return self.tempC
 
 
 class MAX31855SPIError(Exception):
