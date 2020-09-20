@@ -95,16 +95,50 @@ window.abortTask = abortTask
 
 
 function enterNewMode() {
-    state="EDIT"
-    $('#status').slideUp();
-    $('#edit').show();
-    $('#profile_selector').hide();
-    $('#btn_controls').hide();
-    $('#form_profile_name').attr('value', getRandomProfileName());
-    $('#form_profile_name').attr('placeholder', 'Please enter a name');
-    graph.profile.points.show = true;
-    graph.profile.data = [];
-    tempProfile = createProfile(profiles, curProfileName, config);
+    curProfileName = getRandomProfileName();
+    profiles[curProfileName] = {
+        name: curProfileName,
+        totalTime: 0,
+        data: [],
+        simplified: [
+            {rise: 0, target: 0, hold: 0}
+        ]
+    }
+    enterEditMode();
+    console.log("creating new profile")
+    // $('#status').slideUp();
+    // $('#edit').show();
+    // $('#profile_selector').hide();
+    // $('#btn_controls').hide();
+    // $('#form_profile_name').attr('value', getRandomProfileName());
+    // $('#form_profile_name').attr('placeholder', 'Please enter a name');
+    // graph.profile.points.show = true;
+    // graph.profile.data = [];
+    // tempProfile = createProfile(profiles, curProfileName, config);
+
+    // //Link table to graph
+    // $(".form-control").change(function(e) {
+    //     let inputID = this.id;
+    //     let val = this.value;
+
+    //     // handle changes to the schedule / profile name
+    //     if (inputID == "form_profile_name") {
+    //         if (val.includes(":") || val.includes(" ")) {
+    //             alert("Sorry, your schedule name may not contain a colon (:) or a space");
+    //             $('#form_profile_name').val(curProfileName);
+    //         } else {
+    //             tempProfile = profiles[curProfileName];
+    //             tempProfile.name = val;
+    //             $('#form_profile_name').val(val);
+    //             curProfileName = val;
+    //         }
+
+    //     // handle changes to any part of the schedule other than the name
+    //     } else {
+    //         tempProfile = onProfileChange(tempProfile, inputID, parseInt(val), config)
+    //     }
+
+    // });
 }
 window.enterNewMode = enterNewMode
 
@@ -120,7 +154,9 @@ function enterEditMode() {
 
     graph.profile.points.show = true;
     graph.plot = updateGraph(graph);
+
     editProfile(profiles[curProfileName], config);
+
     tempProfile = profiles[curProfileName];
 
     //Link table to graph
@@ -145,7 +181,6 @@ function enterEditMode() {
             tempProfile = onProfileChange(tempProfile, inputID, parseInt(val), config)
         }
 
-        //console.log(tempProfile)
     });
 }
 window.enterEditMode = enterEditMode
@@ -182,7 +217,12 @@ function saveProfile(profileName) {
     }
 
     // filter out any segments with no data in them
-    let segments = newProfile.simplified.filter(seg => !!seg.rise && !!seg.target && !!seg.hold)
+    let segments = newProfile.simplified.filter(seg => !!seg.rise && !!seg.target && !!seg.hold);
+
+    if (segments.length == 0) {
+        alert("sorry, it appears that you have not entered any data");
+        return;
+    }
 
     // convert to C for storage if the user is using F
     if (config.tempScale == "F") {
@@ -196,7 +236,7 @@ function saveProfile(profileName) {
     newProfile.simplified = segments;
 
     // munch the profile to make the graph happy then put it into profiles
-    profiles[newProfile.name] = calculateProfileData(newProfile, config);
+    profiles[newProfile.name] = calculateProfileData(newProfile, config, true);
 
     // display the new graph
     graph = populateProfileGraph(graph, config, profiles[newProfile.name]);

@@ -150,19 +150,16 @@ export function onProfileChange(tempProfile, inputID, val, config) {
     let fieldType = decodedID[2];
 
     console.log("changing " + fieldType + " to " + val + " in segment " + segID);
-    console.log(tempProfile)
 
     // update the profile object with the new value
     tempProfile.simplified[segID][fieldType] = val;
-
     
     tempProfile = calculateProfileData(tempProfile, config)
-    console.log(tempProfile)
 
     return tempProfile;
 }
 
-export function calculateProfileData(profile, config) {
+export function calculateProfileData(profile, config, saving=false) {
     let timeCount = 0;
     let segments = profile.simplified;
     let segData = [];
@@ -170,13 +167,13 @@ export function calculateProfileData(profile, config) {
 
     segments.forEach((segment, index) => {
 
-        if (segment.rise == 0) {
+        if (saving && segment.rise == 0) {
             problemFlag = true;
             alert("The rise for a given segment may never be 0. If you would like to hold at a temperature, then add a hold to the segment just before, rather than creating a new segment.")
-        } else if (segment.target < 0) {
+        } else if (saving && segment.target < 0) {
             problemFlag = true;
             alert("Are you sure you're operating a kiln? Target temp may not be less than 0")
-        } else if (segment.hold < 0) {
+        } else if (saving && segment.hold < 0) {
             problemFlag = true;
             alert("This is an amazing program but it is not a time machine. Please set your hold to 0 or more")
         }
@@ -187,10 +184,10 @@ export function calculateProfileData(profile, config) {
         let rise = segment.rise;
         let targetTemp = segment.target;
 
-        if (startTemp < targetTemp && rise < 0) {
+        if (saving && startTemp < targetTemp && rise < 0) {
             problemFlag = true;
             alert(`You cannot ask a kiln to reach a target (${targetTemp}) that is larger than the previous target (${startTemp}) while decreasing temperature at ${rise} per hour.`)
-        } else if (startTemp > targetTemp && rise > 0) {
+        } else if (saving && startTemp > targetTemp && rise > 0) {
             problemFlag = true;
             alert(`You cannot ask a kiln to reach a target (${targetTemp}) that is smaller than the previous target (${startTemp}) while increasing temperature at ${rise} per hour.`)
         }
@@ -217,7 +214,7 @@ export function calculateProfileData(profile, config) {
     profile["data"] = segData;
     profile["type"] = "newProfile";
     profile["totalTime"] = timeCount;
-    profile = calculateProfileGraph(profile, config);
+    profile = (saving) ? calculateProfileGraph(profile, config) : profile;
 
     return profile;
 }
