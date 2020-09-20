@@ -35,14 +35,14 @@ heater_invert = 1 # switches the polarity of the heater control
 #   max31855 - bitbang SPI interface
 #   max31855spi - kernel SPI interface
 #   max6675 - bitbang SPI interface
-max31855 = 1
+max31855 = 0
 max6675 = 0
-max31855spi = 0 # if you use this one, you MUST reassign the default GPIO pins
+max31855spi = 1 # if you use this one, you MUST reassign the default GPIO pins
 
 ### Thermocouple Connection (using bitbang interfaces)
-gpio_sensor_cs = 27
-gpio_sensor_clock = 22
-gpio_sensor_data = 17
+gpio_sensor_cs = 17
+gpio_sensor_clock = 11
+gpio_sensor_data = 9
 
 ### Thermocouple SPI Connection (using adafrut drivers + kernel SPI interface)
 spi_sensor_chip_id = 0

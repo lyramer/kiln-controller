@@ -137,7 +137,7 @@ class Oven (threading.Thread):
                     (curTemp <= self.segment.targetTemp and self.segment.rise < 0) or
                     (self.segment.rise == 0 and self.segTime >= minDuration)
                 ):
-                    # housekeepint for starting a new segment
+                    # housekeeping for starting a new segment
                     self.segmentID += 1
                     self.segStart = datetime.datetime.now()
                     self.segtime = 0
@@ -257,7 +257,7 @@ class TempSensorReal(TempSensor):
 
         if config.max31855spi:
             log.info("init MAX31855-spi")
-            self.thermocouple = MAX31855SPI(spi_dev=SPI.SpiDev(port=0, device=config.spi_sensor_chip_id))
+            self.thermocouple = MAX31855SPI(self.time_step))
 
     def run(self):
         while True:
