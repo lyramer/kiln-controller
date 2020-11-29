@@ -1,6 +1,8 @@
 #!/usr/bin/python
 import RPi.GPIO as GPIO
 import math
+import logging
+log = logging.getLogger(__name__)
 
 class MAX31855(object):
     '''Python driver for [MAX38155 Cold-Junction Compensated Thermocouple-to-Digital Converter](http://www.maximintegrated.com/datasheet/index.mvp/id/7273)
@@ -69,10 +71,12 @@ class MAX31855(object):
         '''Checks error bits to see if there are any SCV, SCG, or OC faults'''
         if data_32 is None:
             data_32 = self.data
+
         anyErrors = (data_32 & 0x10000) != 0    # Fault bit, D16
         noConnection = (data_32 & 0x00000001) != 0       # OC bit, D0
         shortToGround = (data_32 & 0x00000002) != 0      # SCG bit, D1
         shortToVCC = (data_32 & 0x00000004) != 0         # SCV bit, D2
+        
         if anyErrors:
             if noConnection:
                 raise MAX31855Error("No Connection")
@@ -223,6 +227,7 @@ class MAX31855(object):
             b9 = 0.000000E+00
         else:
             # TODO: handle error - out of range
+            log.error("Error: voltageSum out of range: %s", str(voltageSum))
             return 0
         return (b0 +
             b1 * voltageSum +
